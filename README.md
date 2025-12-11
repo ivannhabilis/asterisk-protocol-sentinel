@@ -103,3 +103,19 @@ same => n,Return()
 ; Bloco de Erro (Caso o Admin nao configure a URL)
 same => n(erro_url),NoOp(!!! ERRO CRITICO: URL WEBHOOK AUSENTE NO CUSTOM DESTINATION !!!)
 same => n,Return()
+
+## 📡 Exemplo de Payload Recebido
+
+```json
+{
+  "protocol": "20251210213005",
+  "caller_id": "11999998888",
+  "did": "1130004000",
+  "unique_id": "167890.123",
+  "timestamp": "1733878205",
+  "channel": "PJSIP/trunk-001"
+}
+```
+
+Este sistema foi projetado para operar sem necessidade de intervenção via console.
+
