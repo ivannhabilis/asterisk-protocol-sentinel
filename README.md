@@ -71,45 +71,47 @@ Copie este bloco exato para dentro do *Configuration File Editor*:
 
 ```ini
 [gera-protocolo-sentinel]
-; --- INICIO DA OPERACAO SENTINEL (WEB GUI EDITION) ---
-; Autor: Ivann
-; Versao: Production-NoSSH
-;
-; O sistema espera receber a URL como argumento do Custom Destination.
-; Formato do Target: gera-protocolo-sentinel,s,1(URL_DO_WEBHOOK)
+; --- INICIO DA OPERACAO SENTINEL (HYBRID MODE) ---
+; Versao: 2.0 - Robustez Total
+; O Webhook agora é opcional. O protocolo será gerado de qualquer forma.
 
-; 1. Validacao de Seguranca
+; 1. MISSAO CRITICA: Gerar Protocolo e Gravar (Independente de Webhook)
 exten => s,1,NoOp(>>> INICIANDO PROTOCOLO SENTINEL <<<)
-same => n,Set(URL_WEBHOOK=${ARG1})
-same => n,GotoIf($["${URL_WEBHOOK}" = ""]?erro_url)
-
-; 2. Geracao do Protocolo (Timestamp Puro)
 same => n,Set(__PROTOCOLO=${STRFTIME(${EPOCH},,%Y%m%d%H%M%S)})
+same => n,Set(CDR(userfield)=${PROTOCOLO})
 
-; 3. Coleta de Metadados
+; 2. ANALISE DE RECURSO: O cliente quer Webhook?
+; Captura o argumento vindo do Custom Destination
+same => n,Set(URL_WEBHOOK=${ARG1})
+
+; CONDICIONAL: Se a URL estiver vazia, PULA para o label 'falar_protocolo'
+; Sintaxe: GotoIf(CONDICAO?LABEL_SE_VERDADEIRO:LABEL_SE_FALSO)
+same => n,GotoIf($["${URL_WEBHOOK}" = ""]?falar_protocolo)
+
+; 3. MISSAO AUXILIAR: Envio de Dados (So executa se nao pulou acima)
+same => n,NoOp(--- URL detectada: Enviando Webhook ---)
 same => n,Set(D_ORIGEM=${CALLERID(num)})
 same => n,Set(D_DESTINO=${CALLERID(dnid)})
 same => n,Set(D_UNIQUEID=${UNIQUEID})
 same => n,Set(D_CANAL=${CHANNEL})
 same => n,Set(D_EPOCH=${EPOCH})
 
-; 4. Auditoria Local (CDR)
-; Grava o protocolo no campo 'Userfield' do relatorio de chamadas
-same => n,Set(CDR(userfield)=${PROTOCOLO})
-
-; 5. Disparo Externo (Webhook Assincrono)
-; Utiliza o curl em background (&) para garantir zero latencia no audio
+; Disparo assincrono (&) para nao travar o audio caso a API esteja lenta
 same => n,System(curl -s -H "Content-Type: application/json" -X POST -d '{"protocol":"${PROTOCOLO}", "caller_id":"${D_ORIGEM}", "did":"${D_DESTINO}", "unique_id":"${D_UNIQUEID}", "timestamp":"${D_EPOCH}", "channel":"${D_CANAL}"}' "${URL_WEBHOOK}" &)
 
-; 6. Interacao com Cliente
+; 4. INTERACAO COM O CLIENTE (Ponto de encontro do salto)
+same => n(falar_protocolo),NoOp(--- Iniciando Audio do Protocolo ---)
 same => n,Answer()
 same => n,Wait(0.5)
-; Certifique-se de ter criado a gravacao 'protocolo-intro' no System Recordings
+
+; Audio de introducao (Ex: "Anote seu protocolo")
 same => n,Playback(custom/protocolo-intro)
+
+; Fala os digitos
 same => n,SayDigits(${PROTOCOLO})
 same => n,Wait(0.5)
 
-; 7. Retorno para a GUI
+; 5. CONCLUSAO
 same => n,Return()
 ```
 
