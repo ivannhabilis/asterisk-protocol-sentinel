@@ -31,6 +31,20 @@ Este projeto implementa um sistema de geração de protocolos de atendimento no 
 
 ### Passo 3: Criar o Destino e Definir a URL
 
+#### ⚙️ Modos de Configuração (Com ou Sem Webhook)
+
+A flexibilidade é total. Você decide no momento de criar o **Custom Destination**.
+
+##### Cenário A: Cliente quer Webhook (Auditoria Completa)
+No campo **Target**, insira a URL entre parênteses:
+`gera-protocolo-sentinel,s,1(https://api.cliente.com/hook)`
+
+##### Cenário B: Cliente quer APENAS o Protocolo (Sem Integração)
+No campo **Target**, deixe sem argumentos (ou parênteses vazios):
+`gera-protocolo-sentinel,s,1`
+
+**Resultado:** O sistema gerará o protocolo, gravará no CDR local e falará para o cliente, mas ignorará silenciosamente a etapa de envio de dados.
+
 Aqui é onde você define para onde os dados vão, específico para cada cliente.
 
 1.  Vá em **Admin** > **Custom Destinations**.
