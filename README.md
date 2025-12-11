@@ -104,8 +104,8 @@ same => n(falar_protocolo),NoOp(--- Iniciando Audio do Protocolo ---)
 same => n,Answer()
 same => n,Wait(0.5)
 
-; Audio de introducao (Ex: "Anote seu protocolo")
-same => n,Playback(custom/protocolo-intro)
+; Audio de introducao (Ex: "Ola, é um prazer falar com você. Anote seu protocolo:")
+same => n,Playback(/var/lib/asterisk/sounds/pt-br/custom/protocolo-intro)
 
 ; Fala os digitos
 same => n,SayDigits(${PROTOCOLO})
@@ -114,11 +114,6 @@ same => n,Wait(0.5)
 ; 5. CONCLUSAO
 same => n,Return()
 ```
-
-
-; Bloco de Erro (Caso o Admin nao configure a URL)
-same => n(erro_url),NoOp(!!! ERRO CRITICO: URL WEBHOOK AUSENTE NO CUSTOM DESTINATION !!!)
-same => n,Return()
 
 ## 📡 Exemplo de Payload Recebido
 
